@@ -23,6 +23,16 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
   Map<String, String> categoryMap = new Map();
   Activity acceptedActivity;
 
+  List<int> completedActivitiesList;
+
+  Future<List<int>> getUserCompletedActivites({bool force = false}) async {
+    if (force || completedActivitiesList == null) {
+      completedActivitiesList =
+          await FirebaseUtils().getUserCompletedActivites();
+    }
+    return completedActivitiesList;
+  }
+
   Future<List<Activity>> getUserMatchingActivities({bool force = false}) async {
     await getUserMatchingCategories();
 
@@ -60,6 +70,7 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    getUserMatchingActivities();
     return Scaffold(
         backgroundColor: Colors.white,
         body: Stack(
@@ -104,40 +115,50 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
                   Positioned(
                     left: 24,
                     top: 48,
-                    child: Column(
-                      children: <Widget>[
-                        Center(
-                          child: Text(
-                            "5",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                color: Colors.white,
-                                letterSpacing: 1,
-                                fontFamily: 'Open Sans'),
-                          ),
-                        ),
-                        SizedBox(height: 5),
-                        Text(
-                          "TO DO",
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white,
-                              fontFamily: 'Open Sans'),
-                        ),
-                      ],
-                    ),
+                    child: FutureBuilder<List<int>>(
+                        future: FirebaseUtils().getUserCompletedActivites(),
+                        builder: (ctxt, snapshot) {
+                          return Column(
+                            children: <Widget>[
+                              Center(
+                                child: Text(
+                                  activityList == null
+                                      ? "0"
+                                      : activityList.length.toString(),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                      letterSpacing: 1,
+                                      fontFamily: 'Open Sans'),
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              Text(
+                                "TO DO",
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white,
+                                    fontFamily: 'Open Sans'),
+                              ),
+                            ],
+                          );
+                        }),
                   ),
                   Center(
                     child: FutureBuilder<List<int>>(
-                      future: FirebaseUtils().getUserCompletedActivites(),
+                      future: getUserCompletedActivites(),
                       builder: (ctxt, snapshot) {
                         return CircularPercentIndicator(
                           radius: 130.0,
                           backgroundColor: Colors.white38,
                           lineWidth: 3.0,
-                          percent: 0.66,
+                          percent: (snapshot.data.length /
+                              (activityList == null
+                                  ? 0
+                                  : activityList.length +
+                                      snapshot.data.length)),
                           progressColor: Colors.white,
                           center: Container(
                             padding: const EdgeInsets.only(top: 32),
@@ -181,7 +202,9 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
                       children: <Widget>[
                         Center(
                           child: Text(
-                            "2",
+                            completedActivitiesList == null
+                                ? "0"
+                                : completedActivitiesList.length.toString(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,

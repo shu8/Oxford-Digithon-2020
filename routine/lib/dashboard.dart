@@ -24,7 +24,7 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
   Activity acceptedActivity;
 
   Future<List<Activity>> getUserMatchingActivities({bool force = false}) async {
-    await getUserMatchingCategories();
+    await getUserMatchingCategories(force: force);
 
     if (force || activityList == null) {
       activityList = await FirebaseUtils().getUserMatchingActivities();
@@ -45,8 +45,6 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
     if (force || categoryMap == null) {
       categoryList = await FirebaseUtils().getCategories();
     }
-
-    categoryList = await FirebaseUtils().getCategories();
 
     print("THIS IS A TEST");
     for (var y in categoryList) {

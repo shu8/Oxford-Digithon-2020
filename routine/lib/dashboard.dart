@@ -56,10 +56,8 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
       categoryList = await FirebaseUtils().getCategories();
     }
 
-    print("THIS IS A TEST");
+    categoryList = await FirebaseUtils().getCategories();
     for (var y in categoryList) {
-      print(y.name);
-      print(y.imageUrl);
       categoryMap.putIfAbsent(y.name, () => y.imageUrl);
     }
 
@@ -114,7 +112,7 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
                     left: 24,
                     top: 48,
                     child: FutureBuilder<List<int>>(
-                        future: FirebaseUtils().getUserCompletedActivites(),
+                        future: getUserCompletedActivites(),
                         builder: (ctxt, snapshot) {
                           return Column(
                             children: <Widget>[
@@ -148,15 +146,15 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
                     child: FutureBuilder<List<int>>(
                       future: getUserCompletedActivites(),
                       builder: (ctxt, snapshot) {
+                        if (!snapshot.hasData) return Container();
                         return CircularPercentIndicator(
                           radius: 130.0,
                           backgroundColor: Colors.white38,
                           lineWidth: 3.0,
-                          percent: (snapshot.data.length /
-                              (activityList == null
-                                  ? 0
-                                  : activityList.length +
-                                      snapshot.data.length)),
+                          percent: activityList == null
+                              ? 0
+                              : (snapshot.data.length /
+                                  (activityList.length + snapshot.data.length)),
                           progressColor: Colors.white,
                           center: Container(
                             padding: const EdgeInsets.only(top: 32),
@@ -438,6 +436,8 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
                                                 } else {
                                                   setState(() {
                                                     getUserMatchingActivities(
+                                                        force: true);
+                                                    getUserCompletedActivites(
                                                         force: true);
                                                     acceptedActivity = null;
                                                   });
